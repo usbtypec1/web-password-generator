@@ -1,6 +1,6 @@
 <template>
   <div class="h-screen flex flex-col justify-center items-center bg-teal-300 gap-4">
-    <password-display :password="password" @generate-new-password="onGenerateNewPassword"/>
+    <password-display :password="password" @generate-new-password="regeneratePassword"/>
     <div
         class="w-11/12 sm:w-3/4 lg:w-7/12 bg-white flex gap-4 lg:gap-12 justify-between drop-shadow-lg rounded-md px-6 py-4">
       <div class="flex-1">
@@ -30,89 +30,43 @@
       <div>
         <div
             class="flex items-center gap-3"
-            v-for="characteristicsGroup in characteristics"
-            :key="characteristicsGroup.name"
+            v-for="charactersGroup in characters"
+            :key="charactersGroup.name"
         >
           <input
               class="accent-emerald-400 h-6 w-6 cursor-pointer"
               type="checkbox"
-              v-model="characteristicsGroup.isEnabled"
-              :id="`checkbox-${characteristicsGroup.name}`"
+              v-model="charactersGroup.isEnabled"
+              :id="`checkbox-${charactersGroup.name}`"
           >
           <label
-              :for="`checkbox-${characteristicsGroup.name}`"
+              :for="`checkbox-${charactersGroup.name}`"
               class="text-lg cursor-pointer"
           >
-            {{ characteristicsGroup.name }}
+            {{ charactersGroup.name }}
           </label>
         </div>
       </div>
     </div>
     <div class="w-11/12 sm:w-3/4 lg:w-7/12 drop-shadow-lg rounded-md px-6 py-4 flex justify-center">
-      <button
-          @click="onCopyPasswordToClipboard"
-          class="bg-white hover:bg-gray-100 active:bg-gray-300 active:drop-shadow-none active:text-gray-600 outline-none duration-200 drop-shadow-md rounded-3xl px-24 py-3">
-        Copy
-      </button>
+      <copy-to-clipboard-button :password="password"/>
     </div>
   </div>
 </template>
 
 <script setup>
 import {reactive, ref, watch} from "vue";
-import copy from "copy-to-clipboard";
 import PasswordDisplay from "./components/PasswordDisplay.vue";
+import {generatePassword} from "./services/passwordGenerator.js";
+import CopyToClipboardButton from "./components/CopyToClipboardButton.vue";
+import charactersRaw from './data/characters.json'
 
-const characteristics = reactive([
-  {
-    name: "Uppercase",
-    isEnabled: true,
-    value: "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-  },
-  {
-    name: "Lowercase",
-    isEnabled: true,
-    value: "abcdefghijklmnopqrstuvwxyz"
-  },
-  {
-    name: "Numbers",
-    isEnabled: true,
-    value: "0123456789"
-  },
-  {
-    name: "Punctuation",
-    isEnabled: false,
-    value: "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~"
-  }
-]);
-
-const generatePassword = length => {
-  let chosenCharacteristics = characteristics.filter(({isEnabled}) => isEnabled).map(({value}) => value);
-  if (chosenCharacteristics.length === 0) return "Choose characters";
-  chosenCharacteristics = chosenCharacteristics.reduce((a, b) => a + b);
-  return [...Array(length).keys()]
-      .map(() => chosenCharacteristics.charAt(Math.floor(Math.random() * chosenCharacteristics.length)))
-      .reduce((a, b) => a + b);
-};
-
-
+const characters = reactive(charactersRaw);
 const passwordLength = ref(10);
-const password = ref(generatePassword(passwordLength.value));
+const password = ref(generatePassword(characters, passwordLength.value));
 
+const regeneratePassword = () => password.value = generatePassword(characters, passwordLength.value)
 
-const onCopyPasswordToClipboard = () => copy(password.value);
-
-watch(passwordLength, value => {
-  password.value = generatePassword(value);
-});
-
-watch(characteristics, () => {
-  password.value = generatePassword(passwordLength.value);
-});
-
-const onGenerateNewPassword = () => {
-  password.value = generatePassword(passwordLength.value);
-};
-
-
+watch(passwordLength, regeneratePassword);
+watch(characters, regeneratePassword);
 </script>
