@@ -1,0 +1,22 @@
+[
+  {
+    "name": "Uppercase",
+    "isEnabled": true,
+    "value": "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+  },
+  {
+    "name": "Lowercase",
+    "isEnabled": true,
+    "value": "abcdefghijklmnopqrstuvwxyz"
+  },
+  {
+    "name": "Numbers",
+    "isEnabled": true,
+    "value": "0123456789"
+  },
+  {
+    "name": "Punctuation",
+    "isEnabled": false,
+    "value": "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~"
+  }
+]
